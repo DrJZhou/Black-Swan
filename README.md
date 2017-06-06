@@ -23,3 +23,10 @@
 - cd NN
 - sh ./run.sh
 - python ensemble.py
+----
+## 说明
+- src/model1  ExtraTreeRegression
+- src/model2  Sarimax ,Linear Regression
+- src/model3  Random Forst
+- src/model4  XGboost,GBDT
+- NN          Neural Network
