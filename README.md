@@ -9,6 +9,7 @@
 - pandas
 - numpy
 - XGBoost
+- LightGBM
 ### R
 - data.table
 - dplyr
