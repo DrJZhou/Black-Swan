@@ -18,7 +18,7 @@
 - h2o
 ----
 ## 运行
-- cd src
+- cd src/main/
 - python run.py
 - cd NN
 - sh ./run.sh
