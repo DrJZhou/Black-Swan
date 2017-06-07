@@ -6,7 +6,7 @@ import data_processing.data_processing as data_processing
 import model_1.run as model1_run
 import model_2.run as model2_run
 import model_3.run as model3_run
-import model_4.run as model4_run
+import model_4.rice_run as model4_run
 
 def main():
     '''

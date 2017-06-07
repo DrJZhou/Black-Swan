@@ -13,7 +13,7 @@ warnings.filterwarnings("ignore")
 def sarimax_model_build():
 
     # 外部特征
-    data = ['T1D0', 'T1D1', 'T2D0', 'T3D0', 'T3D1']
+    data = ['T1D0'] #, 'T1D1', 'T2D0', 'T3D0', 'T3D1'
     peak = ['EarlyPeakTime', 'LatePeakTime', 'NormalTime']
     holiday = ['BeforeNationalDay', 'NationalDayStart', 'NationalDayEnd', 'Weekend', 'WorkingDay', 'WorkingWeekend']
     weather = ['BigRain', 'MediumRain', 'SmallRain', 'Sunny']
@@ -22,10 +22,11 @@ def sarimax_model_build():
     order = (6, 0, 1)
     seasonal_order = (1, 0, 1, 72)
 
-    out_model_pkl = 'SARIMAX_%d_%d_%d_%d_%d_%d_%d_%%s_new.pkl' %(order+seasonal_order)
-    out_model_path = 'model'
-    if out_model_path not in listdir('.'):
-        mkdir(out_model_path)
+    out_model_pkl = 'SARIMAX_%d_%d_%d_%d_%d_%d_%d_%%s.pkl' %(order+seasonal_order)
+    out_model_path = '../../data/data_after_process/tmp_file'
+
+    # if out_model_path not in listdir(out_model_path):
+    #     mkdir(out_model_path)
 
     for i in data:
 

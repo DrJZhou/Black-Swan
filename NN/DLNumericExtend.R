@@ -138,4 +138,4 @@ submitData[,pred:=pred1]
 submitData[pred2<pred,pred:=pred2]
 submitData[, time_window:=paste("\"[", timeStamp, ",", timeStamp+dminutes(20), ")\"", sep="")]
 submitResult   <- subset(submitData, select=c("tollgate_id","time_window","direction", "pred"))
-write.table(submitResult,file=paste(Sys.Date(), "../answer/ATVNumeric5.csv", sep=""),  row.names=F,col.names=F, quote=F, sep=",")
+write.table(submitResult,file="../../answer/ATVNumeric5.csv",  row.names=F,col.names=F, quote=F, sep=",")

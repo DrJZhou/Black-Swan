@@ -135,13 +135,13 @@ def sarimax_preparation_main(volume, test_volume, weather_train_file, weather_tr
     train_data.to_csv('sarimax_data.csv',index=True)
 
 def main():
-    basepath = '../../data/data_after_process/'
-    volume_file = basepath + 'training_20min_avg_volume.csv'
-    volume_file_new = basepath + 'training2_20min_avg_volume.csv'
-    test_volume_file = basepath + 'test2_20min_avg_volume.csv'
-    weather_train_file = basepath + 'dataSets/training/weather (table 7)_training_update.csv'
-    weather_train_new_file = basepath + 'dataSets/testing_phase1/weather (table 7)_test1.csv'
-    weather_test_file = basepath + 'dataSet_phase2/dataSet_phase2/weather (table 7)_2.csv'
+    basepath = '../../data/'
+    volume_file = basepath + 'data_after_process/training_20min_avg_volume.csv'
+    volume_file_new = basepath + 'data_after_process/training2_20min_avg_volume.csv'
+    test_volume_file = basepath + 'data_after_process/test2_20min_avg_volume.csv'
+    weather_train_file = basepath + 'dataset/weather (table 7)_training_update.csv'
+    weather_train_new_file = basepath + 'dataset/weather (table 7)_test1.csv'
+    weather_test_file = basepath + 'dataset/weather (table 7)_2.csv'
     volume, test_volume = data_preprocess(volume_file, volume_file_new, test_volume_file)
     print 'The data of sarimax is preparating!'
     sarimax_preparation_main(volume, test_volume, weather_train_file, weather_train_new_file, weather_test_file)

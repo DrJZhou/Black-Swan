@@ -134,7 +134,7 @@ def linear_regression_main(volume, test_volume, predict_from_params):
                     week_volume_3_weekend = week_volume_3[5 * 12:]
                     
                     # predict phase
-                    print i + 1, j, weight_array_weekend, weight_array_no_weekend
+                    # print i + 1, j, weight_array_weekend, weight_array_no_weekend
                     tmp_volume_weekend = weight_array_weekend[0] * week_volume_0_weekend + weight_array_weekend[
                                                                                                1] * week_volume_1_weekend + \
                                          weight_array_weekend[2] * week_volume_2_weekend + weight_array_weekend[
@@ -183,7 +183,7 @@ def linear_regression_main(volume, test_volume, predict_from_params):
                     week_volume_1 = volume_8_9_17_18[volume_8_9_17_18['time_window_week'] == 1]['volume'].values
                     week_volume_2 = volume_8_9_17_18[volume_8_9_17_18['time_window_week'] == 2]['volume'].values
                     week_volume_3 = volume_8_9_17_18[volume_8_9_17_18['time_window_week'] == 3]['volume'].values
-                    print i + 1, j, weight_array
+                    # print i + 1, j, weight_array
                     tmp_volume = weight_array[0] * week_volume_0 + weight_array[1] * week_volume_1 + weight_array[
                                                                                                          2] * week_volume_2 + \
                                  weight_array[3] * week_volume_3
@@ -199,7 +199,7 @@ def linear_regression_main(volume, test_volume, predict_from_params):
     # import time
     # version = time.strftime('%Y-%m-%d_%R', time.localtime(time.time()))
     # res.to_csv('answer/prediction_'+version+'.csv',float_format='%.2f',header=True,index=False,encoding='utf-8')
-    answer.to_csv('../../answer/prediction_linear.csv', float_format='%.2f', header=True, index=False, encoding='utf-8')
+    answer.to_csv('../../answer/prediction_linear_regression.csv', float_format='%.2f', header=True, index=False, encoding='utf-8')
 
 # predict_from_params for predicting with no training
 def main(predict_from_params = True):
@@ -208,7 +208,7 @@ def main(predict_from_params = True):
     volume_file_new = basepath + 'training2_20min_avg_volume.csv'
     test_volume_file = basepath + 'test2_20min_avg_volume.csv'
     volume, test_volume = data_preprocess(volume_file, volume_file_new, test_volume_file)
-    print 'knn is running!'
+    print 'linear_regression is running!'
     linear_regression_main(volume, test_volume, predict_from_params)
 
 

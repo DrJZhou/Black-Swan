@@ -11,10 +11,10 @@ from sklearn.externals import joblib
 def sarimax_predict():
 
     model, prediction = {}, {}
-    data = ['T1D0', 'T1D1', 'T2D0', 'T3D0', 'T3D1']
+    data = ['T1D0'] #, 'T1D1', 'T2D0', 'T3D0', 'T3D1'
     train_data = pd.read_csv('sarimax_data.csv',index_col=0)
     in_model_pkl = 'SARIMAX_6_0_1_1_0_1_72_%s.pkl'
-    in_model_path = 'model'
+    in_model_path = '../../data/data_after_process/tmp_file'
 
     for i in data:
         model[i] = joblib.load(path.join(in_model_path, in_model_pkl % (i)))
