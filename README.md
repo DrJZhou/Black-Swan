@@ -32,7 +32,7 @@
 - NN          Neural Network
 
 ## KDD CUP 2017 task2
-复赛15
+初赛3  复赛15
 
 ## 联系方式
 - yitian1988@outlook.com
