@@ -1,4 +1,5 @@
 # Black-Swan
+# 注：具体思路请看task中的pdf文件
 ## KDD CUP 2017 task2
 初赛第一，复赛第二
 ----
@@ -30,3 +31,10 @@
 - src/model3  Random Forst
 - src/model4  XGboost,GBDT
 - NN          Neural Network
+
+## KDD CUP 2017 task2
+初赛3  复赛15
+
+## 联系方式
+- yitian1988@outlook.com
+- 1633636038@qq.com
