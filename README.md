@@ -30,3 +30,10 @@
 - src/model3  Random Forst
 - src/model4  XGboost,GBDT
 - NN          Neural Network
+
+## KDD CUP 2017 task2
+复赛15
+
+## 联系方式
+- yitian1988@outlook.com
+- 1633636038@qq.com
