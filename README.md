@@ -1,6 +1,6 @@
 # Black-Swan
 ## KDD CUP 2017 task2
-初赛第一，复赛第四
+初赛第一，复赛第二
 ----
 ## 环境要求
 ### Python2.7
