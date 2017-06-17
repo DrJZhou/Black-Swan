@@ -32,7 +32,7 @@
 - src/model4  XGboost,GBDT
 - NN          Neural Network
 
-## KDD CUP 2017 task2
+## KDD CUP 2017 task1
 初赛3  复赛15
 
 ## 联系方式
