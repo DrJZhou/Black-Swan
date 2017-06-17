@@ -1,0 +1,843 @@
+
+R version 3.3.3 (2017-03-06) -- "Another Canoe"
+Copyright (C) 2017 The R Foundation for Statistical Computing
+Platform: x86_64-apple-darwin13.4.0 (64-bit)
+
+R is free software and comes with ABSOLUTELY NO WARRANTY.
+You are welcome to redistribute it under certain conditions.
+Type 'license()' or 'licence()' for distribution details.
+
+  Natural language support but running in an English locale
+
+R is a collaborative project with many contributors.
+Type 'contributors()' for more information and
+'citation()' on how to cite R or R packages in publications.
+
+Type 'demo()' for some demos, 'help()' for on-line help, or
+'help.start()' for an HTML browser interface to help.
+Type 'q()' to quit R.
+
+
+Attaching package: ‘lubridate’
+
+The following object is masked from ‘package:base’:
+
+    date
+
+
+Attaching package: ‘dplyr’
+
+The following objects are masked from ‘package:lubridate’:
+
+    intersect, setdiff, union
+
+The following objects are masked from ‘package:base’:
+
+    intersect, setdiff, setequal, union
+
+------------------------------------------------------------------------------
+data.table + dplyr code now lives in dtplyr.
+Please library(dtplyr)!
+------------------------------------------------------------------------------
+
+Attaching package: ‘data.table’
+
+The following objects are masked from ‘package:reshape2’:
+
+    dcast, melt
+
+The following objects are masked from ‘package:dplyr’:
+
+    between, first, last
+
+The following objects are masked from ‘package:lubridate’:
+
+    hour, isoweek, mday, minute, month, quarter, second, wday, week,
+    yday, year
+
+> library(lubridate)
+> library(data.table)
+> 
+> source("ATTHelper.R")
+randomForest 4.6-12
+Type rfNews() to see new features/changes/bug fixes.
+
+Attaching package: ‘randomForest’
+
+The following object is masked from ‘package:ggplot2’:
+
+    margin
+
+The following object is masked from ‘package:dplyr’:
+
+    combine
+
+> load("advancedPreprocess.rda")
+> #################################################################
+> ###The NA Data Imputation 
+> #################################################################
+> totalData   <- totalData[ATT60NumLag1>0,]
+> totalData   <- totalData[!(mark=='test' & extendFlag !='main'), ]
+> 
+> totalData[,intersectionTollgate:=as.factor(intersectionTollgate)]
+> totalData[, hourWindow:=as.factor(hourWindow)]
+> 
+> ###Add the wetherData
+> finalWeatherData    <- finalWeatherData[,.(curDate,curHour,rel_humidity,precipitation)]
+> finalWeatherData[,precipitation:=log(precipitation+1)]
+> finalWeatherData[,precipitation:=ifelse(precipitation>0.1,1,0)]
+> ###### 
+> setkeyv(finalWeatherData, c("curDate","curHour"))
+> setkeyv(totalData, c("curDate", "curHour"))
+> extendData        <- finalWeatherData[totalData]
+> ###Add the holiday
+> extendData[,isHoliday:=0];  extendData[curDate %in% holidayList, isHoliday:=1]
+> extendData[curDate==as.Date("2016-09-30") & hourWindow=='[18,17]',isHoliday:=1]
+> ###The weekindex
+> maxDate         <- extendData[, max(curDate)]
+> extendData[, weekIndex:=as.numeric(floor((maxDate-curDate)/7)+1)]
+> 
+> #################################################################
+> ###The main +-3, +-5
+> #################################################################
+> mainData    <- extendData[extendFlag=='main',]
+> YName       <- "ATT";
+> XNames      <- c("intersectionTollgate" ,"hourWindow","MWInterval","ATTLag6","ATTLag5","ATTLag4","ATTLag3", "ATTLag2", "ATTLag1", "isHoliday")
+> mainData    <- ATTImputationFunc(mainData, XNames=XNames, YName=YName, ntrees=50)
+     |      Out-of-bag   |
+Tree |      MSE  %Var(y) |
+  50 |     1494    42.23 |
+     |      Out-of-bag   |
+Tree |      MSE  %Var(y) |
+  50 |     1494    42.24 |
+     |      Out-of-bag   |
+Tree |      MSE  %Var(y) |
+  50 |     1507    42.59 |
+     |      Out-of-bag   |
+Tree |      MSE  %Var(y) |
+  50 |     1511    42.73 |
+     |      Out-of-bag   |
+Tree |      MSE  %Var(y) |
+  50 |     1526    43.13 |
+
+ iter imp variable
+  1   1  ATTLag6  ATTLag5  ATTLag4  ATTLag3  ATTLag2  ATTLag1  ATT
+  1   2  ATTLag6  ATTLag5  ATTLag4  ATTLag3  ATTLag2  ATTLag1  ATT
+  1   3  ATTLag6  ATTLag5  ATTLag4  ATTLag3  ATTLag2  ATTLag1  ATT
+  1   4  ATTLag6  ATTLag5  ATTLag4  ATTLag3  ATTLag2  ATTLag1  ATT
+  1   5  ATTLag6  ATTLag5  ATTLag4  ATTLag3  ATTLag2  ATTLag1  ATT
+  1   6  ATTLag6  ATTLag5  ATTLag4  ATTLag3  ATTLag2  ATTLag1  ATT
+  1   7  ATTLag6  ATTLag5  ATTLag4  ATTLag3  ATTLag2  ATTLag1  ATT
+  1   8  ATTLag6  ATTLag5  ATTLag4  ATTLag3  ATTLag2  ATTLag1  ATT
+  1   9  ATTLag6  ATTLag5  ATTLag4  ATTLag3  ATTLag2  ATTLag1  ATT
+  1   10  ATTLag6  ATTLag5  ATTLag4  ATTLag3  ATTLag2  ATTLag1  ATT
+  2   1  ATTLag6  ATTLag5  ATTLag4  ATTLag3  ATTLag2  ATTLag1  ATT
+  2   2  ATTLag6  ATTLag5  ATTLag4  ATTLag3  ATTLag2  ATTLag1  ATT
+  2   3  ATTLag6  ATTLag5  ATTLag4  ATTLag3  ATTLag2  ATTLag1  ATT
+  2   4  ATTLag6  ATTLag5  ATTLag4  ATTLag3  ATTLag2  ATTLag1  ATT
+  2   5  ATTLag6  ATTLag5  ATTLag4  ATTLag3  ATTLag2  ATTLag1  ATT
+  2   6  ATTLag6  ATTLag5  ATTLag4  ATTLag3  ATTLag2  ATTLag1  ATT
+  2   7  ATTLag6  ATTLag5  ATTLag4  ATTLag3  ATTLag2  ATTLag1  ATT
+  2   8  ATTLag6  ATTLag5  ATTLag4  ATTLag3  ATTLag2  ATTLag1  ATT
+  2   9  ATTLag6  ATTLag5  ATTLag4  ATTLag3  ATTLag2  ATTLag1  ATT
+  2   10  ATTLag6  ATTLag5  ATTLag4  ATTLag3  ATTLag2  ATTLag1  ATT
+  3   1  ATTLag6  ATTLag5  ATTLag4  ATTLag3  ATTLag2  ATTLag1  ATT
+  3   2  ATTLag6  ATTLag5  ATTLag4  ATTLag3  ATTLag2  ATTLag1  ATT
+  3   3  ATTLag6  ATTLag5  ATTLag4  ATTLag3  ATTLag2  ATTLag1  ATT
+  3   4  ATTLag6  ATTLag5  ATTLag4  ATTLag3  ATTLag2  ATTLag1  ATT
+  3   5  ATTLag6  ATTLag5  ATTLag4  ATTLag3  ATTLag2  ATTLag1  ATT
+  3   6  ATTLag6  ATTLag5  ATTLag4  ATTLag3  ATTLag2  ATTLag1  ATT
+  3   7  ATTLag6  ATTLag5  ATTLag4  ATTLag3  ATTLag2  ATTLag1  ATT
+  3   8  ATTLag6  ATTLag5  ATTLag4  ATTLag3  ATTLag2  ATTLag1  ATT
+  3   9  ATTLag6  ATTLag5  ATTLag4  ATTLag3  ATTLag2  ATTLag1  ATT
+  3   10  ATTLag6  ATTLag5  ATTLag4  ATTLag3  ATTLag2  ATTLag1  ATT
+  4   1  ATTLag6  ATTLag5  ATTLag4  ATTLag3  ATTLag2  ATTLag1  ATT
+  4   2  ATTLag6  ATTLag5  ATTLag4  ATTLag3  ATTLag2  ATTLag1  ATT
+  4   3  ATTLag6  ATTLag5  ATTLag4  ATTLag3  ATTLag2  ATTLag1  ATT
+  4   4  ATTLag6  ATTLag5  ATTLag4  ATTLag3  ATTLag2  ATTLag1  ATT
+  4   5  ATTLag6  ATTLag5  ATTLag4  ATTLag3  ATTLag2  ATTLag1  ATT
+  4   6  ATTLag6  ATTLag5  ATTLag4  ATTLag3  ATTLag2  ATTLag1  ATT
+  4   7  ATTLag6  ATTLag5  ATTLag4  ATTLag3  ATTLag2  ATTLag1  ATT
+  4   8  ATTLag6  ATTLag5  ATTLag4  ATTLag3  ATTLag2  ATTLag1  ATT
+  4   9  ATTLag6  ATTLag5  ATTLag4  ATTLag3  ATTLag2  ATTLag1  ATT
+  4   10  ATTLag6  ATTLag5  ATTLag4  ATTLag3  ATTLag2  ATTLag1  ATT
+  5   1  ATTLag6  ATTLag5  ATTLag4  ATTLag3  ATTLag2  ATTLag1  ATT
+  5   2  ATTLag6  ATTLag5  ATTLag4  ATTLag3  ATTLag2  ATTLag1  ATT
+  5   3  ATTLag6  ATTLag5  ATTLag4  ATTLag3  ATTLag2  ATTLag1  ATT
+  5   4  ATTLag6  ATTLag5  ATTLag4  ATTLag3  ATTLag2  ATTLag1  ATT
+  5   5  ATTLag6  ATTLag5  ATTLag4  ATTLag3  ATTLag2  ATTLag1  ATT
+  5   6  ATTLag6  ATTLag5  ATTLag4  ATTLag3  ATTLag2  ATTLag1  ATT
+  5   7  ATTLag6  ATTLag5  ATTLag4  ATTLag3  ATTLag2  ATTLag1  ATT
+  5   8  ATTLag6  ATTLag5  ATTLag4  ATTLag3  ATTLag2  ATTLag1  ATT
+  5   9  ATTLag6  ATTLag5  ATTLag4  ATTLag3  ATTLag2  ATTLag1  ATT
+  5   10  ATTLag6  ATTLag5  ATTLag4  ATTLag3  ATTLag2  ATTLag1  ATT
+> 
+> extendLead3 <- extendData[extendFlag=='extendLead3',]
+> extendLead3 <- extendImputationFunc(extendLead3, XNames=XNames, YName=YName, ntrees=50) 
+     |      Out-of-bag   |
+Tree |      MSE  %Var(y) |
+  50 |     1491    42.31 |
+     |      Out-of-bag   |
+Tree |      MSE  %Var(y) |
+  50 |     1542    43.75 |
+     |      Out-of-bag   |
+Tree |      MSE  %Var(y) |
+  50 |     1524    43.23 |
+     |      Out-of-bag   |
+Tree |      MSE  %Var(y) |
+  50 |     1506    42.72 |
+     |      Out-of-bag   |
+Tree |      MSE  %Var(y) |
+  50 |     1513    42.93 |
+> ### The Lag3 extend data imputation
+> extendLag3  <- extendData[extendFlag=='extendLag3',]
+> extendLag3  <- extendImputationFunc(extendLag3, XNames=XNames, YName=YName, ntrees=50)
+     |      Out-of-bag   |
+Tree |      MSE  %Var(y) |
+  50 |     1472    42.03 |
+     |      Out-of-bag   |
+Tree |      MSE  %Var(y) |
+  50 |     1473    42.05 |
+     |      Out-of-bag   |
+Tree |      MSE  %Var(y) |
+  50 |     1481    42.27 |
+     |      Out-of-bag   |
+Tree |      MSE  %Var(y) |
+  50 |     1501    42.86 |
+     |      Out-of-bag   |
+Tree |      MSE  %Var(y) |
+  50 |     1495    42.67 |
+> 
+> extendLead5 <- extendData[extendFlag=='extendLead5',]
+> extendLead5 <- extendImputationFunc(extendLead5, XNames=XNames, YName=YName, ntrees=50) 
+     |      Out-of-bag   |
+Tree |      MSE  %Var(y) |
+  50 |     1476    41.75 |
+     |      Out-of-bag   |
+Tree |      MSE  %Var(y) |
+  50 |     1503    42.49 |
+     |      Out-of-bag   |
+Tree |      MSE  %Var(y) |
+  50 |     1509    42.69 |
+     |      Out-of-bag   |
+Tree |      MSE  %Var(y) |
+  50 |     1526    43.16 |
+     |      Out-of-bag   |
+Tree |      MSE  %Var(y) |
+  50 |     1507    42.62 |
+> ### The Lag5 extend data imputation
+> extendLag5  <- extendData[extendFlag=='extendLag5',]
+> extendLag5  <- extendImputationFunc(extendLag5, XNames=XNames, YName=YName, ntrees=50)
+     |      Out-of-bag   |
+Tree |      MSE  %Var(y) |
+  50 |     1460    42.10 |
+     |      Out-of-bag   |
+Tree |      MSE  %Var(y) |
+  50 |     1463    42.20 |
+     |      Out-of-bag   |
+Tree |      MSE  %Var(y) |
+  50 |     1453    41.91 |
+     |      Out-of-bag   |
+Tree |      MSE  %Var(y) |
+  50 |     1476    42.57 |
+     |      Out-of-bag   |
+Tree |      MSE  %Var(y) |
+  50 |     1445    41.68 |
+> #################################################################
+> ###the Lead2 and Lag2
+> #################################################################
+> extendLead2 <- extendData[extendFlag=='extendLead2',]
+> extendLead2 <- extendImputationFunc(extendLead2, XNames=XNames, YName=YName, ntrees=50)
+     |      Out-of-bag   |
+Tree |      MSE  %Var(y) |
+  50 |     1526    43.21 |
+     |      Out-of-bag   |
+Tree |      MSE  %Var(y) |
+  50 |     1538    43.54 |
+     |      Out-of-bag   |
+Tree |      MSE  %Var(y) |
+  50 |     1544    43.72 |
+     |      Out-of-bag   |
+Tree |      MSE  %Var(y) |
+  50 |     1522    43.10 |
+     |      Out-of-bag   |
+Tree |      MSE  %Var(y) |
+  50 |     1536    43.49 |
+> ### The Lag2 extend data imputation
+> extendLag2  <- extendData[extendFlag=='extendLag2',]
+> extendLag2  <- extendImputationFunc(extendLag2, XNames=XNames, YName=YName, ntrees=50)
+     |      Out-of-bag   |
+Tree |      MSE  %Var(y) |
+  50 |     1471    42.01 |
+     |      Out-of-bag   |
+Tree |      MSE  %Var(y) |
+  50 |     1488    42.50 |
+     |      Out-of-bag   |
+Tree |      MSE  %Var(y) |
+  50 |     1480    42.24 |
+     |      Out-of-bag   |
+Tree |      MSE  %Var(y) |
+  50 |     1474    42.08 |
+     |      Out-of-bag   |
+Tree |      MSE  %Var(y) |
+  50 |     1497    42.74 |
+> 
+> sapply(extendLag2, function(x){sum(is.na(x))})
+             curDate              curHour         rel_humidity 
+                   0                    0                    0 
+       precipitation intersectionTollgate            timeStamp 
+                   0                    0                    0 
+          hourWindow      intersection_id          tollgate_id 
+                   0                    0                    0 
+           linkCount                  ATT               lastTT 
+                   0                    0                    0 
+              prevTT           vehicleNum          curMinute20 
+                   0                    0                    0 
+                mark           MWInterval        ATT120MeanLag 
+                   0                    0                    0 
+         ATT120SdLag         ATT120NumLag        ATT60MeanLag1 
+                  93                    0                    0 
+         ATT60SdLag1         ATT60NumLag1        ATT60MeanLag2 
+                 238                    0                  243 
+         ATT60SdLag2         ATT60NumLag2        ATT40MeanLag1 
+                 599                    0                  158 
+        ATT40NumLag1           ATTNumLag6           ATTNumLag5 
+                   0                    0                    0 
+          ATTNumLag4           ATTNumLag3           ATTNumLag2 
+                   0                    0                    0 
+          ATTNumLag1              ATTLag6              ATTLag5 
+                   0                    0                    0 
+             ATTLag4              ATTLag3              ATTLag2 
+                   0                    0                    0 
+             ATTLag1           extendFlag            isHoliday 
+                   0                    0                    0 
+           weekIndex 
+                   0 
+> sapply(extendLead2, function(x){sum(is.na(x))})
+             curDate              curHour         rel_humidity 
+                   0                    0                    0 
+       precipitation intersectionTollgate            timeStamp 
+                   0                    0                    0 
+          hourWindow      intersection_id          tollgate_id 
+                   0                    0                    0 
+           linkCount                  ATT               lastTT 
+                   0                    0                    0 
+              prevTT           vehicleNum          curMinute20 
+                   0                    0                    0 
+                mark           MWInterval        ATT120MeanLag 
+                   0                    0                    0 
+         ATT120SdLag         ATT120NumLag        ATT60MeanLag1 
+                  97                    0                    0 
+         ATT60SdLag1         ATT60NumLag1        ATT60MeanLag2 
+                 270                    0                  215 
+         ATT60SdLag2         ATT60NumLag2        ATT40MeanLag1 
+                 574                    0                  184 
+        ATT40NumLag1           ATTNumLag6           ATTNumLag5 
+                   0                    0                    0 
+          ATTNumLag4           ATTNumLag3           ATTNumLag2 
+                   0                    0                    0 
+          ATTNumLag1              ATTLag6              ATTLag5 
+                   0                    0                    0 
+             ATTLag4              ATTLag3              ATTLag2 
+                   0                    0                    0 
+             ATTLag1           extendFlag            isHoliday 
+                   0                    0                    0 
+           weekIndex 
+                   0 
+> #################################################################
+> ###the Lead4 and Lag4
+> #################################################################
+> extendLead4 <- extendData[extendFlag=='extendLead4',]
+> extendLead4 <- extendImputationFunc(extendLead4, XNames=XNames, YName=YName, ntrees=50)
+     |      Out-of-bag   |
+Tree |      MSE  %Var(y) |
+  50 |     1470    41.99 |
+     |      Out-of-bag   |
+Tree |      MSE  %Var(y) |
+  50 |     1467    41.90 |
+     |      Out-of-bag   |
+Tree |      MSE  %Var(y) |
+  50 |     1472    42.04 |
+     |      Out-of-bag   |
+Tree |      MSE  %Var(y) |
+  50 |     1500    42.85 |
+     |      Out-of-bag   |
+Tree |      MSE  %Var(y) |
+  50 |     1464    41.82 |
+> ### The Lag4 extend data imputation
+> extendLag4  <- extendData[extendFlag=='extendLag4',]
+> extendLag4  <- extendImputationFunc(extendLag4, XNames=XNames, YName=YName, ntrees=50)
+     |      Out-of-bag   |
+Tree |      MSE  %Var(y) |
+  50 |     1470    42.40 |
+     |      Out-of-bag   |
+Tree |      MSE  %Var(y) |
+  50 |     1482    42.75 |
+     |      Out-of-bag   |
+Tree |      MSE  %Var(y) |
+  50 |     1483    42.77 |
+     |      Out-of-bag   |
+Tree |      MSE  %Var(y) |
+  50 |     1486    42.84 |
+     |      Out-of-bag   |
+Tree |      MSE  %Var(y) |
+  50 |     1498    43.20 |
+> 
+> sapply(extendLag4, function(x){sum(is.na(x))})
+             curDate              curHour         rel_humidity 
+                   0                    0                    0 
+       precipitation intersectionTollgate            timeStamp 
+                   0                    0                    0 
+          hourWindow      intersection_id          tollgate_id 
+                   0                    0                    0 
+           linkCount                  ATT               lastTT 
+                   0                    0                    0 
+              prevTT           vehicleNum          curMinute20 
+                   0                    0                    0 
+                mark           MWInterval        ATT120MeanLag 
+                   0                    0                    0 
+         ATT120SdLag         ATT120NumLag        ATT60MeanLag1 
+                  99                    0                    0 
+         ATT60SdLag1         ATT60NumLag1        ATT60MeanLag2 
+                 251                    0                  238 
+         ATT60SdLag2         ATT60NumLag2        ATT40MeanLag1 
+                 600                    0                  139 
+        ATT40NumLag1           ATTNumLag6           ATTNumLag5 
+                   0                    0                    0 
+          ATTNumLag4           ATTNumLag3           ATTNumLag2 
+                   0                    0                    0 
+          ATTNumLag1              ATTLag6              ATTLag5 
+                   0                    0                    0 
+             ATTLag4              ATTLag3              ATTLag2 
+                   0                    0                    0 
+             ATTLag1           extendFlag            isHoliday 
+                   0                    0                    0 
+           weekIndex 
+                   0 
+> sapply(extendLead4, function(x){sum(is.na(x))})
+             curDate              curHour         rel_humidity 
+                   0                    0                    0 
+       precipitation intersectionTollgate            timeStamp 
+                   0                    0                    0 
+          hourWindow      intersection_id          tollgate_id 
+                   0                    0                    0 
+           linkCount                  ATT               lastTT 
+                   0                    0                    0 
+              prevTT           vehicleNum          curMinute20 
+                   0                    0                    0 
+                mark           MWInterval        ATT120MeanLag 
+                   0                    0                    0 
+         ATT120SdLag         ATT120NumLag        ATT60MeanLag1 
+                  97                    0                    0 
+         ATT60SdLag1         ATT60NumLag1        ATT60MeanLag2 
+                 260                    0                  204 
+         ATT60SdLag2         ATT60NumLag2        ATT40MeanLag1 
+                 548                    0                  184 
+        ATT40NumLag1           ATTNumLag6           ATTNumLag5 
+                   0                    0                    0 
+          ATTNumLag4           ATTNumLag3           ATTNumLag2 
+                   0                    0                    0 
+          ATTNumLag1              ATTLag6              ATTLag5 
+                   0                    0                    0 
+             ATTLag4              ATTLag3              ATTLag2 
+                   0                    0                    0 
+             ATTLag1           extendFlag            isHoliday 
+                   0                    0                    0 
+           weekIndex 
+                   0 
+> 
+> #################################################################
+> ###the Lead6 and Lag6
+> #################################################################
+> extendLead6 <- extendData[extendFlag=='extendLead6',]
+> extendLead6 <- extendImputationFunc(extendLead6, XNames=XNames, YName=YName, ntrees=50)
+     |      Out-of-bag   |
+Tree |      MSE  %Var(y) |
+  50 |     1526    42.55 |
+     |      Out-of-bag   |
+Tree |      MSE  %Var(y) |
+  50 |     1563    43.59 |
+     |      Out-of-bag   |
+Tree |      MSE  %Var(y) |
+  50 |     1539    42.91 |
+     |      Out-of-bag   |
+Tree |      MSE  %Var(y) |
+  50 |     1538    42.89 |
+     |      Out-of-bag   |
+Tree |      MSE  %Var(y) |
+  50 |     1537    42.86 |
+> ### The Lag6 extend data imputation
+> extendLag6  <- extendData[extendFlag=='extendLag6',]
+> extendLag6  <- extendImputationFunc(extendLag6, XNames=XNames, YName=YName, ntrees=50)
+     |      Out-of-bag   |
+Tree |      MSE  %Var(y) |
+  50 |     1467    41.84 |
+     |      Out-of-bag   |
+Tree |      MSE  %Var(y) |
+  50 |     1475    42.07 |
+     |      Out-of-bag   |
+Tree |      MSE  %Var(y) |
+  50 |     1471    41.96 |
+     |      Out-of-bag   |
+Tree |      MSE  %Var(y) |
+  50 |     1480    42.20 |
+     |      Out-of-bag   |
+Tree |      MSE  %Var(y) |
+  50 |     1477    42.12 |
+> 
+> sapply(extendLag6, function(x){sum(is.na(x))})
+             curDate              curHour         rel_humidity 
+                   0                    0                    0 
+       precipitation intersectionTollgate            timeStamp 
+                   0                    0                    0 
+          hourWindow      intersection_id          tollgate_id 
+                   0                    0                    0 
+           linkCount                  ATT               lastTT 
+                   0                    0                    0 
+              prevTT           vehicleNum          curMinute20 
+                   0                    0                    0 
+                mark           MWInterval        ATT120MeanLag 
+                   0                    0                    0 
+         ATT120SdLag         ATT120NumLag        ATT60MeanLag1 
+                 102                    0                    0 
+         ATT60SdLag1         ATT60NumLag1        ATT60MeanLag2 
+                 257                    0                  238 
+         ATT60SdLag2         ATT60NumLag2        ATT40MeanLag1 
+                 603                    0                  144 
+        ATT40NumLag1           ATTNumLag6           ATTNumLag5 
+                   0                    0                    0 
+          ATTNumLag4           ATTNumLag3           ATTNumLag2 
+                   0                    0                    0 
+          ATTNumLag1              ATTLag6              ATTLag5 
+                   0                    0                    0 
+             ATTLag4              ATTLag3              ATTLag2 
+                   0                    0                    0 
+             ATTLag1           extendFlag            isHoliday 
+                   0                    0                    0 
+           weekIndex 
+                   0 
+> sapply(extendLead6, function(x){sum(is.na(x))})
+             curDate              curHour         rel_humidity 
+                   0                    0                    0 
+       precipitation intersectionTollgate            timeStamp 
+                   0                    0                    0 
+          hourWindow      intersection_id          tollgate_id 
+                   0                    0                    0 
+           linkCount                  ATT               lastTT 
+                   0                    0                    0 
+              prevTT           vehicleNum          curMinute20 
+                   0                    0                    0 
+                mark           MWInterval        ATT120MeanLag 
+                   0                    0                    0 
+         ATT120SdLag         ATT120NumLag        ATT60MeanLag1 
+                  97                    0                    0 
+         ATT60SdLag1         ATT60NumLag1        ATT60MeanLag2 
+                 261                    0                  209 
+         ATT60SdLag2         ATT60NumLag2        ATT40MeanLag1 
+                 529                    0                  176 
+        ATT40NumLag1           ATTNumLag6           ATTNumLag5 
+                   0                    0                    0 
+          ATTNumLag4           ATTNumLag3           ATTNumLag2 
+                   0                    0                    0 
+          ATTNumLag1              ATTLag6              ATTLag5 
+                   0                    0                    0 
+             ATTLag4              ATTLag3              ATTLag2 
+                   0                    0                    0 
+             ATTLag1           extendFlag            isHoliday 
+                   0                    0                    0 
+           weekIndex 
+                   0 
+> #################################################################
+> ###the Lead8 and Lag8
+> #################################################################
+> extendLead8 <- extendData[extendFlag=='extendLead8',]
+> extendLead8 <- extendImputationFunc(extendLead8, XNames=XNames, YName=YName, ntrees=50)
+     |      Out-of-bag   |
+Tree |      MSE  %Var(y) |
+  50 |     1531    42.51 |
+     |      Out-of-bag   |
+Tree |      MSE  %Var(y) |
+  50 |     1526    42.39 |
+     |      Out-of-bag   |
+Tree |      MSE  %Var(y) |
+  50 |     1515    42.08 |
+     |      Out-of-bag   |
+Tree |      MSE  %Var(y) |
+  50 |     1556    43.21 |
+     |      Out-of-bag   |
+Tree |      MSE  %Var(y) |
+  50 |     1532    42.55 |
+> ### The Lag8 extend data imputation
+> extendLag8  <- extendData[extendFlag=='extendLag8',]
+> extendLag8  <- extendImputationFunc(extendLag8, XNames=XNames, YName=YName, ntrees=50)
+     |      Out-of-bag   |
+Tree |      MSE  %Var(y) |
+  50 |     1515    42.50 |
+     |      Out-of-bag   |
+Tree |      MSE  %Var(y) |
+  50 |     1503    42.16 |
+     |      Out-of-bag   |
+Tree |      MSE  %Var(y) |
+  50 |     1555    43.62 |
+     |      Out-of-bag   |
+Tree |      MSE  %Var(y) |
+  50 |     1537    43.13 |
+     |      Out-of-bag   |
+Tree |      MSE  %Var(y) |
+  50 |     1507    42.28 |
+> 
+> sapply(extendLag8, function(x){sum(is.na(x))})
+             curDate              curHour         rel_humidity 
+                   0                    0                    0 
+       precipitation intersectionTollgate            timeStamp 
+                   0                    0                    0 
+          hourWindow      intersection_id          tollgate_id 
+                   0                    0                    0 
+           linkCount                  ATT               lastTT 
+                   0                    0                    0 
+              prevTT           vehicleNum          curMinute20 
+                   0                    0                    0 
+                mark           MWInterval        ATT120MeanLag 
+                   0                    0                    0 
+         ATT120SdLag         ATT120NumLag        ATT60MeanLag1 
+                 109                    0                    0 
+         ATT60SdLag1         ATT60NumLag1        ATT60MeanLag2 
+                 273                    0                  238 
+         ATT60SdLag2         ATT60NumLag2        ATT40MeanLag1 
+                 610                    0                  119 
+        ATT40NumLag1           ATTNumLag6           ATTNumLag5 
+                   0                    0                    0 
+          ATTNumLag4           ATTNumLag3           ATTNumLag2 
+                   0                    0                    0 
+          ATTNumLag1              ATTLag6              ATTLag5 
+                   0                    0                    0 
+             ATTLag4              ATTLag3              ATTLag2 
+                   0                    0                    0 
+             ATTLag1           extendFlag            isHoliday 
+                   0                    0                    0 
+           weekIndex 
+                   0 
+> sapply(extendLead8, function(x){sum(is.na(x))})
+             curDate              curHour         rel_humidity 
+                   0                    0                    0 
+       precipitation intersectionTollgate            timeStamp 
+                   0                    0                    0 
+          hourWindow      intersection_id          tollgate_id 
+                   0                    0                    0 
+           linkCount                  ATT               lastTT 
+                   0                    0                    0 
+              prevTT           vehicleNum          curMinute20 
+                   0                    0                    0 
+                mark           MWInterval        ATT120MeanLag 
+                   0                    0                    0 
+         ATT120SdLag         ATT120NumLag        ATT60MeanLag1 
+                  89                    0                    0 
+         ATT60SdLag1         ATT60NumLag1        ATT60MeanLag2 
+                 238                    0                  222 
+         ATT60SdLag2         ATT60NumLag2        ATT40MeanLag1 
+                 513                    0                  188 
+        ATT40NumLag1           ATTNumLag6           ATTNumLag5 
+                   0                    0                    0 
+          ATTNumLag4           ATTNumLag3           ATTNumLag2 
+                   0                    0                    0 
+          ATTNumLag1              ATTLag6              ATTLag5 
+                   0                    0                    0 
+             ATTLag4              ATTLag3              ATTLag2 
+                   0                    0                    0 
+             ATTLag1           extendFlag            isHoliday 
+                   0                    0                    0 
+           weekIndex 
+                   0 
+> 
+> #################################################################
+> ###the Lead10 and Lag10
+> #################################################################
+> extendLead10 <- extendData[extendFlag=='extendLead10',]
+> extendLead10 <- extendImputationFunc(extendLead10, XNames=XNames, YName=YName, ntrees=50)
+     |      Out-of-bag   |
+Tree |      MSE  %Var(y) |
+  50 |     1555    42.57 |
+     |      Out-of-bag   |
+Tree |      MSE  %Var(y) |
+  50 |     1563    42.80 |
+     |      Out-of-bag   |
+Tree |      MSE  %Var(y) |
+  50 |     1588    43.46 |
+     |      Out-of-bag   |
+Tree |      MSE  %Var(y) |
+  50 |     1561    42.74 |
+     |      Out-of-bag   |
+Tree |      MSE  %Var(y) |
+  50 |     1579    43.24 |
+> ### The Lag10 extend data imputation
+> extendLag10  <- extendData[extendFlag=='extendLag10',]
+> extendLag10  <- extendImputationFunc(extendLag10, XNames=XNames, YName=YName, ntrees=50)
+     |      Out-of-bag   |
+Tree |      MSE  %Var(y) |
+  50 |     1521    42.60 |
+     |      Out-of-bag   |
+Tree |      MSE  %Var(y) |
+  50 |     1530    42.87 |
+     |      Out-of-bag   |
+Tree |      MSE  %Var(y) |
+  50 |     1537    43.07 |
+     |      Out-of-bag   |
+Tree |      MSE  %Var(y) |
+  50 |     1525    42.73 |
+     |      Out-of-bag   |
+Tree |      MSE  %Var(y) |
+  50 |     1556    43.58 |
+> 
+> sapply(extendLag10, function(x){sum(is.na(x))})
+             curDate              curHour         rel_humidity 
+                   0                    0                    0 
+       precipitation intersectionTollgate            timeStamp 
+                   0                    0                    0 
+          hourWindow      intersection_id          tollgate_id 
+                   0                    0                    0 
+           linkCount                  ATT               lastTT 
+                   0                    0                    0 
+              prevTT           vehicleNum          curMinute20 
+                   0                    0                    0 
+                mark           MWInterval        ATT120MeanLag 
+                   0                    0                    0 
+         ATT120SdLag         ATT120NumLag        ATT60MeanLag1 
+                  99                    0                    0 
+         ATT60SdLag1         ATT60NumLag1        ATT60MeanLag2 
+                 276                    0                  245 
+         ATT60SdLag2         ATT60NumLag2        ATT40MeanLag1 
+                 624                    0                  108 
+        ATT40NumLag1           ATTNumLag6           ATTNumLag5 
+                   0                    0                    0 
+          ATTNumLag4           ATTNumLag3           ATTNumLag2 
+                   0                    0                    0 
+          ATTNumLag1              ATTLag6              ATTLag5 
+                   0                    0                    0 
+             ATTLag4              ATTLag3              ATTLag2 
+                   0                    0                    0 
+             ATTLag1           extendFlag            isHoliday 
+                   0                    0                    0 
+           weekIndex 
+                   0 
+> sapply(extendLead10, function(x){sum(is.na(x))})
+             curDate              curHour         rel_humidity 
+                   0                    0                    0 
+       precipitation intersectionTollgate            timeStamp 
+                   0                    0                    0 
+          hourWindow      intersection_id          tollgate_id 
+                   0                    0                    0 
+           linkCount                  ATT               lastTT 
+                   0                    0                    0 
+              prevTT           vehicleNum          curMinute20 
+                   0                    0                    0 
+                mark           MWInterval        ATT120MeanLag 
+                   0                    0                    0 
+         ATT120SdLag         ATT120NumLag        ATT60MeanLag1 
+                  91                    0                    0 
+         ATT60SdLag1         ATT60NumLag1        ATT60MeanLag2 
+                 237                    0                  229 
+         ATT60SdLag2         ATT60NumLag2        ATT40MeanLag1 
+                 475                    0                  164 
+        ATT40NumLag1           ATTNumLag6           ATTNumLag5 
+                   0                    0                    0 
+          ATTNumLag4           ATTNumLag3           ATTNumLag2 
+                   0                    0                    0 
+          ATTNumLag1              ATTLag6              ATTLag5 
+                   0                    0                    0 
+             ATTLag4              ATTLag3              ATTLag2 
+                   0                    0                    0 
+             ATTLag1           extendFlag            isHoliday 
+                   0                    0                    0 
+           weekIndex 
+                   0 
+> 
+> #################################################################
+> ###the combined data
+> #################################################################
+> extendData	<- rbind(extendLead2, extendLag2,extendLead3,extendLag3, extendLead4, extendLag4,extendLead5, extendLag5,
++                            extendLead6, extendLag6, extendLead8, extendLag8,extendLead10, extendLag10)
+> extendData	<- subset(extendData, select=colnames(mainData))
+> finalData	<- rbind(mainData, extendData)
+> 
+> print(sapply(finalData, function(x){sum(is.na(x))}))
+             curDate              curHour         rel_humidity 
+                   0                    0                    0 
+       precipitation            timeStamp      intersection_id 
+                   0                    0                    0 
+         tollgate_id            linkCount                  ATT 
+                   0                    0                  504 
+              lastTT               prevTT           vehicleNum 
+                 504                  504                    0 
+         curMinute20                 mark        ATT120MeanLag 
+                   0                    0                    0 
+         ATT120SdLag         ATT120NumLag        ATT60MeanLag1 
+                1462                    0                    0 
+         ATT60SdLag1         ATT60NumLag1        ATT60MeanLag2 
+                3856                    0                 3424 
+         ATT60SdLag2         ATT60NumLag2        ATT40MeanLag1 
+                8586                    0                 2387 
+        ATT40NumLag1           ATTNumLag6           ATTNumLag5 
+                   0                    0                    0 
+          ATTNumLag4           ATTNumLag3           ATTNumLag2 
+                   0                    0                    0 
+          ATTNumLag1           extendFlag            weekIndex 
+                   0                    0                    0 
+intersectionTollgate           hourWindow           MWInterval 
+                   0                    0                    0 
+             ATTLag6              ATTLag5              ATTLag4 
+                   0                    0                    0 
+             ATTLag3              ATTLag2              ATTLag1 
+                   0                    0                    0 
+           isHoliday 
+                   0 
+> 
+> save(finalData, file='baseImputationData.rda')
+> 
+> ################################################################
+> ###Revised those too large data
+> #################################################################
+> finalData[is.na(ATT40MeanLag1), ATT40MeanLag1:=ATT60MeanLag1]
+> 
+> ATT120SdLagFill    <- apply(subset(finalData, select=paste("ATTLag",1:6,sep="")),1, sd)
+> finalData$ATT120SdLagFill    <- ATT120SdLagFill
+> finalData[ATT120NumLag<3, ATT120SdLag:=ATT120SdLagFill]
+> finalData[ATT60NumLag1<3, ATT60SdLag1:=ATT120SdLag]
+> finalData[ATT60NumLag2<3, ATT60SdLag2:=ATT120SdLag]
+> 
+> sapply(finalData, function(x){sum(is.na(x))})
+             curDate              curHour         rel_humidity 
+                   0                    0                    0 
+       precipitation            timeStamp      intersection_id 
+                   0                    0                    0 
+         tollgate_id            linkCount                  ATT 
+                   0                    0                  504 
+              lastTT               prevTT           vehicleNum 
+                 504                  504                    0 
+         curMinute20                 mark        ATT120MeanLag 
+                   0                    0                    0 
+         ATT120SdLag         ATT120NumLag        ATT60MeanLag1 
+                   0                    0                    0 
+         ATT60SdLag1         ATT60NumLag1        ATT60MeanLag2 
+                   0                    0                 3424 
+         ATT60SdLag2         ATT60NumLag2        ATT40MeanLag1 
+                   0                    0                    0 
+        ATT40NumLag1           ATTNumLag6           ATTNumLag5 
+                   0                    0                    0 
+          ATTNumLag4           ATTNumLag3           ATTNumLag2 
+                   0                    0                    0 
+          ATTNumLag1           extendFlag            weekIndex 
+                   0                    0                    0 
+intersectionTollgate           hourWindow           MWInterval 
+                   0                    0                    0 
+             ATTLag6              ATTLag5              ATTLag4 
+                   0                    0                    0 
+             ATTLag3              ATTLag2              ATTLag1 
+                   0                    0                    0 
+           isHoliday      ATT120SdLagFill 
+                   0                    0 
+> save(finalData, file="dataImputation.rda")
+> 
+> 
+> proc.time()
+   user  system elapsed 
+620.226  63.034 682.149 
