@@ -479,11 +479,11 @@ def model(model_name, train_sample, validation_sample, features, day_range, filt
             print(curr_day, "-", curr_hour, curr_validation_sample.shape)
             if curr_validation_sample.shape[0] > 0:
                 if model_name == "lightgbm":
-                    curr_predict = lightgbm(curr_train_sample, curr_validation_sample, features, model_param)
+                    curr_predict = lightgbm(train_sample, curr_validation_sample, features, model_param)
                 elif model_name == "xgboost":
-                    curr_predict = xgboost(curr_train_sample, curr_validation_sample, features, model_param)
+                    curr_predict = xgboost(train_sample, curr_validation_sample, features, model_param)
                 else:
-                    curr_predict = gbrt(curr_train_sample, curr_validation_sample, features, model_param)
+                    curr_predict = gbrt(train_sample, curr_validation_sample, features, model_param)
                 curr_validation_sample[model_name] = curr_predict
 
             df.append(curr_validation_sample)

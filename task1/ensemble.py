@@ -116,6 +116,8 @@ def addHand(filename):
     data=[]
     fr = open(filename)
     for line in fr.readlines():
+        if line[0]=='t':
+            return False
         data.append(line.strip())
     fr=open(filename,"w")
     fr.write("tollgate_id,time_window,direction,volume\n")
@@ -208,12 +210,13 @@ if __name__ == '__main__':
     special_judge(fileto5, fileto1, fileto5, 2, 0, day='2016-10-31', mark=0)
 
     # 2-0 2016-10-31 17:00-18:00  40_35_25
-    special_judge(fileto5, fileto3, fileto5, 2, 0, day='2016-10-31', mark=1)
+    special_judge(fileto5, fileto4, fileto5, 2, 0, day='2016-10-31', mark=1)
 
     # 2-0 2016-10-30 17:00-18:00  aeoluss
     special_judge(fileto5, filename3, fileto5, 2, 0, day='2016-10-30', mark=1)
 
 
+    # filename7 = './answer/result_5_31_merge_all_0.45_0.45_0.1_change.csv'
     list = [fileto1,fileto2, filename6,fileto5]
     for i in range(len(list)):
         for j in range(i + 1, len(list)):
