@@ -1,4 +1,5 @@
 # Black-Swan
+# 注：具体思路请看task中的pdf文件
 ## KDD CUP 2017 task2
 初赛第一，复赛第二
 ----
